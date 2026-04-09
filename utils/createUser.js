@@ -19,6 +19,10 @@ const endpoints = require('../data/testData').endpoints;
             birth_year: process.env.BIRTH_YEAR,
             country: process.env.COUNTRY,
             mobile_number: process.env.MOBILE_NUMBER,
+            address1: process.env.ADDRESS,
+            city: process.env.CITY,
+            state: process.env.STATE,
+            zipcode: process.env.ZIPCODE,
         })
         console.log('Пользователь создан:', email);
     } catch (err) {

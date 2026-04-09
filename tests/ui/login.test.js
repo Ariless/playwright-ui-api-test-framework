@@ -1,19 +1,19 @@
-// tests/ui/login.test.js
-const { test, expect } = require('../../fixtures/registeredUserFixture');
-const { LoginPage } = require('../../pages/loginPage');
+const { test, expect } = require('../../fixtures/userFixture');
+const { LoginPage } = require('../../pages/LoginPage');
 
-test('Login success', async ({ page, registeredUser }) => {
+test('Login with valid credentials', async ({ page, user }) => {
+    const {email, password} = user
     const loginPage = new LoginPage(page);
-    await loginPage.login(registeredUser.username, registeredUser.password);
+    await loginPage.login(email, password);
 
-    // Проверяем, что token появился в localStorage
-    const token = await page.evaluate(() => localStorage.getItem('token'));
-    expect(token).not.toBeNull();
-});
+    // Проверяем, что юзер успешно залогинился
+    await expect(page.locator('a[href="/logout"]')).toBeVisible();
+})
 
-test('Wrong password', async ({ page, registeredUser }) => {
+test('Login with invalid credentials', async ({ page, user }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login(registeredUser.username, 'WrongPass123!');
+    const { email } = user;
+    await loginPage.login(email, 'WrongPass123!');
 
-    await loginPage.expectError('Invalid username or password!');
-});
+    await loginPage.expectError('Your email or password is incorrect!');
+})
