@@ -1,0 +1,8 @@
+.env
+node_modules/
+playwright-report/
+test-results/
+after-login.png
+profile-debug.png
+utils/user.json
+playwrite.config.js
