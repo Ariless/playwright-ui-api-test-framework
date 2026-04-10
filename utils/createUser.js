@@ -2,11 +2,10 @@ require('dotenv').config();
 const { api } = require('./apiClient');
 const endpoints = require('../data/testData').endpoints;
 
+      // Создаём пользователя через API
 (async () => {
     const email = process.env.EMAIL;
-
     try {
-        // Создаём пользователя через API
         const userRes = await api.post(endpoints.account, {
             name: process.env.NAME,
             email: process.env.EMAIL,
@@ -23,8 +22,12 @@ const endpoints = require('../data/testData').endpoints;
             city: process.env.CITY,
             state: process.env.STATE,
             zipcode: process.env.ZIPCODE,
-        })
-        console.log('Пользователь создан:', email);
+        });
+        if (userRes.data.responseCode === 201) {
+            console.log('Пользователь создан:', email);
+        } else {
+            console.log('Ошибка API:', userRes.data.message);
+        }
     } catch (err) {
         console.log('Ошибка:', err.response?.data || err.message);
     }

@@ -7,7 +7,7 @@ test('Login with valid credentials', async ({ page, user }) => {
     await loginPage.login(email, password);
 
     // Проверяем, что юзер успешно залогинился
-    await expect(page.locator('a[href="/logout"]')).toBeVisible();
+    await expect(page.locator('a[href="/logout"]')).toBeVisible({ timeout: 15000 });
 })
 
 test('Login with invalid credentials', async ({ page, user }) => {

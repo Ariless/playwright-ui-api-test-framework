@@ -21,7 +21,6 @@ class LoginPage extends BasePage {
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
         await this.loginButton.click();
-        await this.page.waitForLoadState('load');
     }
 
     async expectError(text) {
