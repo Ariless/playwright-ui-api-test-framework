@@ -13,7 +13,11 @@ module.exports = defineConfig({
     retries: 1,
 
     // Репортер — используй 'html'
-    reporter: [['html', { open: 'never' }]],
+    reporter: [
+        ['list'],
+        ['html'],
+        ['allure-playwright']
+    ],
 
     use: {
         // Базовый URL берём из .env

@@ -1,8 +1,21 @@
-.env
-node_modules/
-playwright-report/
-test-results/
 after-login.png
 profile-debug.png
 utils/user.json
 playwrite.config.js
+
+# Playwright reports
+playwright-report/
+
+# Test artifacts
+test-results/
+blob-report/
+
+# Allure reports (generated locally)
+allure-results/
+allure-report/
+
+# Node dependencies
+node_modules/
+
+# Environment variables
+.env

@@ -22,11 +22,11 @@ test.describe('Auth UI', () => {
     });
 
     test('Logout user is logged out', async ({ page, user }) => {
-        const { email, password, name } = user;
+        const { email, password } = user;
         const loginPage = new LoginPage(page);
         await loginPage.login(email, password);
 
-        await expect(page.locator('a[href="/logout"]')).toBeVisible({ timeout: 15000 });
+        await page.locator('a[href="/logout"]').click();
         await expect(page.locator('a[href="/login"]')).toBeVisible();
         await expect(page).toHaveURL('/login');
     });

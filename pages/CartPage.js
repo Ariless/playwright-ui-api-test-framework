@@ -25,8 +25,9 @@ class CartPage extends BasePage {
     async clearCart() {
         await this.open();
         while (await this.deleteButton.count() > 0) {
-            await this.deleteButton.first().click();
-            await this.page.waitForTimeout(300);
+            const btn = this.deleteButton.first();
+            await btn.click();
+            await btn.waitFor({ state: 'detached' });
         }
     }
 }
