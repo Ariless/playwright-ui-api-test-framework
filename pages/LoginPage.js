@@ -6,6 +6,7 @@ class LoginPage extends BasePage {
      */
     constructor(page) {
         super(page);
+        this.url = '/login';
         this.emailInput = page.locator('input[data-qa="login-email"]');
         this.passwordInput = page.locator('input[data-qa="login-password"]');
         this.loginButton = page.locator('button[data-qa="login-button"]');
@@ -13,14 +14,11 @@ class LoginPage extends BasePage {
     }
 
     async login(email, password) {
-        await this.page.goto('/login');
-        const cookieBtn = this.page.locator('button.fc-button.fc-cta-consent');
-        if (await cookieBtn.isVisible()) {
-            await cookieBtn.click();
-        }
+        await this.navigate(this.url);
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
         await this.loginButton.click();
+        await this.page.waitForLoadState('load');
     }
 
     async expectError(text) {
