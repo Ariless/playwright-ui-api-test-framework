@@ -12,17 +12,13 @@ class CheckoutPage extends BasePage {
         this.placeOrderButton = page.locator('a[href="/payment"]')
     }
 
-    async assertDeliveryAddress(user) {
-        await expect(this.deliveryAddress).toContainText(user.firstname);
-        await expect(this.deliveryAddress).toContainText(user.address1);
-        await expect(this.deliveryAddress).toContainText(user.city);
+    async getDeliveryAddressText() {
+        return await this.deliveryAddress.innerText();
     }
-
 
     async placeOrder() {
         await this.placeOrderButton.click();
-        await this.page.waitForLoadState('load');
-
+        await this.page.waitForURL('**/payment');
     }
 }
 

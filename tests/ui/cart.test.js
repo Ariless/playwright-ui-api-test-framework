@@ -1,18 +1,16 @@
 const { test, expect } = require('../../fixtures/userFixture');
-const { ProductsPage } = require('../../pages/ProductsPage');
-const { ProductPage } = require("../../pages/ProductPage");
-const { CartPage } = require('../../pages/CartPage');
+const { PageFactory } = require('../../pages/PageFactory');
 
-test.describe('Cart UI', () => {
+test.describe('Cart UI @ui', () => {
 
-    test('Add product to cart', async ({ loggedInPage }) => {
+    test('Add product to cart @smoke', async ({ loggedInPage }) => {
         const page = loggedInPage;
-        const productsPage = new ProductsPage(page);
+        const productsPage = new PageFactory(page).productsPage();
         const productId = 5;
         await productsPage.openProduct(productId);
-        const productPage = new ProductPage(page, productId);
+        const productPage = new PageFactory(page).productPage(productId);
         await productPage.addToCart();
-        const cartPage = new CartPage(page);
+        const cartPage = new PageFactory(page).cartPage();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
         await cartPage.clearCart();
@@ -20,28 +18,29 @@ test.describe('Cart UI', () => {
 
     test('Cart persistence', async ({ loggedInPage }) => {
         const page = loggedInPage;
-        const productsPage = new ProductsPage(page);
+        const productsPage = new PageFactory(page).productsPage();
         const productId = 2;
         await productsPage.openProduct(productId);
-        const productPage = new ProductPage(page, productId);
+        const productPage = new PageFactory(page).productPage(productId);
         await productPage.addToCart();
-        const cartPage = new CartPage(page);
+        const cartPage = new PageFactory(page).cartPage();
         await page.reload();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
         await cartPage.clearCart();
     });
 
+
     test('Add product with quantity', async ({ loggedInPage }) => {
         const page = loggedInPage;
-        const productsPage = new ProductsPage(page);
+        const productsPage =new PageFactory(page).productsPage();
         const productId = 6;
         await productsPage.openProduct(productId);
-        const productPage = new ProductPage(page, productId);
+        const productPage = new PageFactory(page).productPage(productId);
         const quantity = 2;
         await productPage.setQuantity(quantity);
         await productPage.addToCart();
-        const cartPage = new CartPage(page);
+        const cartPage = new PageFactory(page).cartPage();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
         await expect(cartPage.getProductQuantity(productId)).toHaveText(String(quantity));

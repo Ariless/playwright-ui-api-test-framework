@@ -1,4 +1,3 @@
-const { expect } = require('@playwright/test');
 const BasePage = require('./BasePage');
 
 class ProductsPage extends BasePage {
@@ -13,9 +12,6 @@ class ProductsPage extends BasePage {
         this.results = page.locator('.features_items');
         this.productNames = page.locator('.features_items p');
         this.firstProductLink = page.locator('.choose a').first();
-        this.productInformation = page.locator('.product-information');
-        this.productName = page.locator('.product-information h2')
-        this.productPrice = page.locator('.product-information span span')
     }
 
     async search(query) {

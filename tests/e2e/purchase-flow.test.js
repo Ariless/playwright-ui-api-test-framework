@@ -1,45 +1,37 @@
 const { test, expect } = require('../../fixtures/userFixture');
-const { ProductsPage } = require('../../pages/ProductsPage');
-const { ProductPage } = require('../../pages/ProductPage');
-const { CartPage } = require('../../pages/CartPage');
-const { CheckoutPage } = require('../../pages/CheckoutPage');
-const { PaymentPage } = require('../../pages/PaymentPage');
-const { ConfirmationPage } = require('../../pages/ConfirmationPage');
+const { PageFactory } = require('../../pages/PageFactory');
+const { cardData } = require('../../data/testData');
 
-
-test('Registered user completes full purchase', async ({ loggedInPage, user }) => {
+test('Registered user completes full purchase @e2e', async ({ loggedInPage, user }) => {
     const page = loggedInPage;
-    const productsPage = new ProductsPage(page);
+    const productsPage = new PageFactory(page).productsPage();
     await productsPage.search('Blue Top');
     const productId = 1;
     await productsPage.openProduct(productId);
-    const productPage = new ProductPage(page, productId);
+    const productPage = new PageFactory(page).productPage(productId);
     await productPage.addToCart();
-    const cartPage = new CartPage(page);
+    const cartPage = new PageFactory(page).cartPage() ;
     await expect(cartPage.getProduct(productId)).toBeVisible();
 
     await cartPage.checkout();
-    const checkoutPage = new CheckoutPage(page);
-    await checkoutPage.assertDeliveryAddress(user);
+    const checkoutPage =new PageFactory(page).checkoutPage();
+
+    const address = await checkoutPage.getDeliveryAddressText();
+    expect(address).toContain(user.firstname);
+    expect(address).toContain(user.address1);
+    expect(address).toContain(user.city);
 
     await checkoutPage.placeOrder();
 
-    const paymentPage = new PaymentPage(page);
-    const cardData = {
-        nameOnCard: 'Test User',
-        cardNumber: '4111111111111111',
-        cvc: '123',
-        expiryMonth: '12',
-        expiryYear: '2027'
-    };
+    const paymentPage = new PageFactory(page).paymentPage();
     await paymentPage.fillPaymentForm(cardData)
     await paymentPage.confirmPayment()
 
-    await expect(page).toHaveURL('payment_done/500')
-    await expect(page.getByText('Congratulations! Your order has been confirmed!')).toBeVisible();
-    await expect(page.locator('[data-qa="continue-button"]')).toBeVisible();
+    const confirmationPage = new PageFactory(page).confirmationPage();
+    await expect(page).toHaveURL(/payment_done/);
+    await expect(confirmationPage.confirmationMessage).toBeVisible();
+    await expect(confirmationPage.continueButton).toBeVisible();
 
-    const confirmationPage = new ConfirmationPage(page);
     await confirmationPage.downloadInvoice();
  // дальше я хочу в загруженном файлике проверить текст
 

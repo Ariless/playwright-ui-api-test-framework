@@ -17,11 +17,15 @@ class LoginPage extends BasePage {
         this.signUpButton = page.locator('button[data-qa="signup-button"]');
     }
 
-    async login(email, password) {
+    async submitLoginForm(email, password) {
         await this.navigate(this.url);
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
         await this.loginButton.click();
+    }
+
+    async login(email, password) {
+        await this.submitLoginForm(email, password);
         await this.page.locator('a[href="/logout"]').waitFor({ timeout: 15000 });
     }
 

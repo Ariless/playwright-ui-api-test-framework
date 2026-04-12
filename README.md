@@ -8,12 +8,15 @@ The project demonstrates real-world automation practices including API-driven te
 
 ## Tech Stack
 
-- Playwright (`@playwright/test`)
+- Playwright (`@playwright/test`) — UI tests + API tests via built-in `request`
 - JavaScript (Node.js / CommonJS)
-- axios — REST API client
-- Page Object Model (POM)
-- Fixtures for reusable flows
+- Page Object Model (POM) + Page Factory
+- API Client Layer (`UserClient`, `AuthClient`, `ProductClient`)
+- Custom Playwright Fixtures for reusable flows
+- Test tagging (`@smoke`, `@ui`, `@api`, `@e2e`)
 - Environment-based configuration (.env)
+- GitHub Actions CI/CD
+- Allure + Playwright HTML reporting
 
 ---
 
@@ -36,10 +39,11 @@ my-test-framework/
 │   ├── ui/        # UI test scenarios (auth, products, cart)
 │   ├── api/       # API tests (auth, products, users)
 │   └── e2e/       # End-to-end business flows
-├── pages/         # Page Object Model
-├── fixtures/      # Reusable test setup
-├── utils/         # API client, helpers
-└── data/          # Endpoints and test data
+├── pages/         # Page Object Model + PageFactory
+├── api/           # API Client Layer (UserClient, AuthClient, ProductClient)
+├── fixtures/      # Reusable test setup (user lifecycle, logged-in session)
+├── utils/         # User data generator
+└── data/          # Endpoints and shared test data
 ```
 
 ---
@@ -47,18 +51,20 @@ my-test-framework/
 ## Test Strategy
 
 ### UI Tests
-- Authentication flows (valid / invalid credentials)
-- Product search and validation
-- Cart operations
+- Authentication flows (valid / invalid credentials, logout)
+- Product search and detail page validation
+- Cart operations (add, quantity, persistence)
 
 ### API Tests
-- User management (create, verify, delete)
-- Product endpoints validation (schema, fields)
+- User management (create, duplicate, delete)
+- Product endpoints (schema, fields, search)
+- Auth endpoint (valid / invalid / missing credentials)
 
 ### E2E Tests
-- User lifecycle (API: create → get → delete)
-- Full purchase flow (API setup + UI interaction)
-- Data consistency validation (API vs UI)
+- Full purchase flow — registered user (login → cart → checkout → payment)
+- Guest checkout — register during checkout, then complete purchase
+- Price consistency — product page price matches cart price
+- Negative checkout — empty payment form blocks order placement
 
 ---
 
@@ -66,16 +72,17 @@ my-test-framework/
 
 This framework follows a hybrid testing strategy:
 
-- API used for **test data setup**
+- API used for **test data setup** (user creation via fixture)
 - UI used for **user behavior simulation**
-- API used for **final validation**
+- API used for **teardown** (user deletion after test)
 
 Example flow:
 
-1. Create user via API
+1. Create user via API (fixture setup)
 2. Login via UI
 3. Add product to cart via UI
-4. Validate state via API
+4. Complete checkout via UI
+5. Delete user via API (fixture teardown)
 
 ---
 
@@ -88,29 +95,10 @@ npm install
 npx playwright install
 ```
 
-Create a `.env` file based on the example below.
-
----
-
-## Environment Variables
+Create a `.env` file:
 
 ```
 BASE_URL=https://automationexercise.com
-EMAIL=test@example.com
-PASSWORD=securepassword
-NAME=Test_User
-FIRSTNAME=Test
-LASTNAME=User
-TITLE=Mr
-BIRTH_DATE=1
-BIRTH_MONTH=1
-BIRTH_YEAR=2000
-COUNTRY=United States
-MOBILE_NUMBER=1234567890
-ADDRESS=123 Main St
-CITY=New York
-STATE=NY
-ZIPCODE=10001
 ```
 
 ---
@@ -118,16 +106,18 @@ ZIPCODE=10001
 ## Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (regression)
 npx playwright test
 
-# Run UI tests
+# Run by tag
+npx playwright test --grep @smoke
+npx playwright test --grep @ui
+npx playwright test --grep @api
+npx playwright test --grep @e2e
+
+# Run by folder
 npx playwright test tests/ui
-
-# Run API tests
 npx playwright test tests/api
-
-# Run E2E tests
 npx playwright test tests/e2e
 ```
 
@@ -135,32 +125,37 @@ npx playwright test tests/e2e
 
 ## Reporting
 
-Playwright HTML Reporter:
-
 ```bash
+# Playwright HTML report
 npx playwright show-report
+
+# Allure report
+npx allure serve allure-results
 ```
+
+---
+
+## CI/CD
+
+Tests run automatically on every push and pull request to `main` via GitHub Actions.
+
+Artifacts uploaded on each run:
+- Allure results
+- Playwright HTML report
+- Screenshots / videos / traces (on failure)
 
 ---
 
 ## Key Engineering Highlights
 
-- Modular and scalable framework design
-- Clean separation between UI, API, and E2E layers
-- API-driven test data management
-- Reusable fixtures and page objects
-- Environment-based configuration
-- Stable locator strategy using data-qa attributes
-
----
-
-## Future Improvements
-
-- GitHub Actions CI pipeline
-- Allure reporting integration
-- Test tagging (smoke / regression)
-- Data-driven tests with multiple datasets
-- Visual regression testing
+- **API Client Layer** — `UserClient`, `AuthClient`, `ProductClient` encapsulate all API calls; tests contain only scenarios
+- **Page Factory pattern** — all Page Objects created through `PageFactory`, no `new PageClass()` in tests
+- **Playwright-native API testing** — no external HTTP libraries; uses built-in `request` fixture for full trace integration
+- **API-driven test data** — users created and deleted via API in fixtures; tests are fully isolated
+- **SRP enforced** — Page Objects contain only locators and actions, assertions stay in tests
+- **Test tagging** — `@smoke` suite runs in under 2 minutes; `@api`, `@ui`, `@e2e` for targeted runs
+- **Stable locators** — `data-qa` attributes preferred over CSS/XPath
+- **No hardcoded credentials** — fallback constants with `.env` override
 
 ---
 

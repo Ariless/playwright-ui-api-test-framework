@@ -1,14 +1,15 @@
 const { test, expect } = require('@playwright/test');
-const { ProductsPage } = require("../../pages/ProductsPage");
+const { PageFactory } = require("../../pages/PageFactory");
 
-test('Search and view product details', async ({ page }) => {
-    const productsPage = new ProductsPage(page);
+test('Search and view product details @ui', async ({ page }) => {
+    const productsPage = new PageFactory(page).productsPage();
     await productsPage.search('Blue Top');
     const count = await productsPage.productNames.count();
     expect(count).toBeGreaterThan(0);
 
     await productsPage.openFirstProduct();
-    await expect(productsPage.productInformation).toBeVisible();
-    await expect(productsPage.productName).toBeVisible();
-    await expect(productsPage.productPrice).toBeVisible();
+    const productPage = new PageFactory(page).productPage();
+    await expect(productPage.productInformation).toBeVisible();
+    await expect(productPage.productName).toBeVisible();
+    await expect(productPage.price).toBeVisible();
 })

@@ -5,7 +5,14 @@ const endpoints = {
     searchProduct: '/api/searchProduct',
     getUser: '/api/getUserDetailByEmail',
     deleteUser: '/api/deleteAccount',
-
 };
 
-module.exports = { endpoints };
+const cardData = {
+    nameOnCard: 'Test User',
+    cardNumber: '4111111111111111',
+    cvc: '123',
+    expiryMonth: '12',
+    expiryYear: '2027'
+};
+
+module.exports = { endpoints, cardData };

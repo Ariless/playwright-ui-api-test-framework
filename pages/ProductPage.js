@@ -11,6 +11,8 @@ class ProductPage extends BasePage {
         this.addToCartButton = page.locator('.btn.btn-default.cart');
         this.quantityInput = page.locator('input#quantity');
         this.price = page.locator('.product-information span span');
+        this.productInformation = page.locator('.product-information');
+        this.productName = page.locator('.product-information h2')
     }
 
     async addToCart() {

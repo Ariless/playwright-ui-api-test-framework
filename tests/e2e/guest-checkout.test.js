@@ -1,31 +1,27 @@
-require('dotenv').config()
 const { test, expect } = require('@playwright/test');
-const { ProductsPage } = require('../../pages/ProductsPage');
-const { ProductPage } = require('../../pages/ProductPage');
-const { CartPage } = require('../../pages/CartPage');
-const { CheckoutPage } = require('../../pages/CheckoutPage');
-const { PaymentPage } = require('../../pages/PaymentPage');
 const { generateUser } = require('../../utils/userUtils');
-const {LoginPage} = require("../../pages/LoginPage");
-const {SignupPage} = require("../../pages/SignupPage");
+const { PageFactory } = require('../../pages/PageFactory');
+const { cardData } = require('../../data/testData');
+const { UserClient } = require('../../api/UserClient');
 
-test('Guest registers during checkout and places order', async ({  page, request  }) => {
-    const productsPage = new ProductsPage(page);
+test('Guest registers during checkout and places order @e2e', async ({  page, request  }) => {
+    const productsPage = new PageFactory(page).productsPage();
+    const userClient = new UserClient(request);
     const productId = 1;
     await productsPage.openProduct(productId);
-    const productPage = new ProductPage(page, productId);
+    const productPage = new PageFactory(page).productPage(productId);
     await productPage.addToCart();
-    const cartPage = new CartPage(page);
+    const cartPage = new PageFactory(page).cartPage();
     await expect(cartPage.getProduct(productId)).toBeVisible();
 
     await cartPage.checkout();
     await cartPage.proceedToLogin();
 
-    const loginPage = new LoginPage(page);
+    const loginPage = new PageFactory(page).loginPage();
     const user = generateUser();
     await loginPage.signUp(user.name, user.email);
 
-    const signupPage = new SignupPage(page);
+    const signupPage = new PageFactory(page).signupPage();
     await signupPage.createAccount(user);
     await expect(signupPage.accountCreatedMessage).toBeVisible();
     await signupPage.continueAfterCreation()
@@ -33,23 +29,17 @@ test('Guest registers during checkout and places order', async ({  page, request
 
     await cartPage.open();
     await cartPage.checkout();
-    const checkoutPage = new CheckoutPage(page);
+    const checkoutPage = new PageFactory(page).checkoutPage();
     await checkoutPage.placeOrder();
 
-    const paymentPage = new PaymentPage(page);
-    const cardData = {
-        nameOnCard: 'Test User',
-        cardNumber: '4111111111111111',
-        cvc: '123',
-        expiryMonth: '12',
-        expiryYear: '2027'
-    };
+    const paymentPage = new PageFactory(page).paymentPage();
     await paymentPage.fillPaymentForm(cardData)
     await paymentPage.confirmPayment()
 
-    await expect(page).toHaveURL('payment_done/500')
-    await expect(page.getByText('Congratulations! Your order has been confirmed!')).toBeVisible();
-    await expect(page.locator('[data-qa="continue-button"]')).toBeVisible();
+    const confirmationPage = new PageFactory(page).confirmationPage();
+    await expect(page).toHaveURL(/payment_done/);
+    await expect(confirmationPage.confirmationMessage).toBeVisible();
+    await expect(confirmationPage.continueButton).toBeVisible();
 
-    await request.delete(process.env.BASE_URL + '/api/deleteAccount', { form: { email: user.email, password: user.password } })
+    await userClient.delete(user.email, user.password)
 });

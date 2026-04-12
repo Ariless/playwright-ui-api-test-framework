@@ -1,45 +1,39 @@
-require('dotenv').config();
 const { test, expect } = require('@playwright/test');
-const { api } = require('../../utils/apiClient');
-const { endpoints } = require('../../data/testData');
+const { UserClient } = require('../../api/UserClient');
 const { generateUser } = require('../../utils/userUtils');
 
-test.describe('Users API', () => {
+test.describe('Users API @api', () => {
 
     test('User registration', async ({ request }) => {
-        const id = Date.now();
+        const userClient = new UserClient(request);
         const user = generateUser();
-        const response = await api.post(endpoints.account, user);
+        const response = await userClient.create(user);
 
-        expect(response.data.responseCode).toBe(201);
-        expect(response.data.message).toBe('User created!');
+        expect((await response.json()).responseCode).toBe(201);
+        expect((await response.json()).message).toBe('User created!');
 
-        await request.delete(process.env.BASE_URL + endpoints.deleteUser, {
-            form: { email: user.email, password: user.password }
-        });
+        await userClient.delete( user.email, user.password )
     });
 
     test('User registration - duplicate email', async ({ request }) => {
-        const id = Date.now();
+        const userClient = new UserClient(request);
         const user = generateUser();
-        await api.post(endpoints.account, user);
-        const response = await api.post(endpoints.account, user);
+        await userClient.create(user);
+        const response = await userClient.create(user);
 
-        expect(response.data.responseCode).toBe(400);
+        expect((await response.json()).responseCode).toBe(400);
 
-        await request.delete(process.env.BASE_URL + endpoints.deleteUser, {
-            form: { email: user.email, password: user.password }
-        });
+        await userClient.delete( user.email, user.password )
+
     });
 
     test('Delete user', async ({ request }) => {
-        const id = Date.now();
+        const userClient = new UserClient(request);
         const user = generateUser();
-        await api.post(endpoints.account, user);
+        await userClient.create(user);
 
-        const response = await request.delete(process.env.BASE_URL + endpoints.deleteUser, {
-            form: { email: user.email, password: user.password }
-        });
+        const response = await userClient.delete( user.email, user.password )
+
         const body = await response.json();
 
         expect(body.responseCode).toBe(200);
