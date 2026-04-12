@@ -27,6 +27,8 @@ jobs:
       # 🧪 Run tests (creates allure-results)
       - name: Run tests
         run: npx playwright test
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
 
       # 📦 Save Allure results as artifact
       - name: Upload Allure results
@@ -43,3 +45,9 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report
+      - name: Upload test artifacts (screenshots, videos, traces)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/

@@ -13,7 +13,6 @@ test.describe('Cart UI', () => {
         const productPage = new ProductPage(page, productId);
         await productPage.addToCart();
         const cartPage = new CartPage(page);
-        await cartPage.open();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
         await cartPage.clearCart();
@@ -27,7 +26,6 @@ test.describe('Cart UI', () => {
         const productPage = new ProductPage(page, productId);
         await productPage.addToCart();
         const cartPage = new CartPage(page);
-        await cartPage.open();
         await page.reload();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
@@ -44,7 +42,6 @@ test.describe('Cart UI', () => {
         await productPage.setQuantity(quantity);
         await productPage.addToCart();
         const cartPage = new CartPage(page);
-        await cartPage.open();
 
         await expect(cartPage.getProduct(productId)).toBeVisible();
         await expect(cartPage.getProductQuantity(productId)).toHaveText(String(quantity));

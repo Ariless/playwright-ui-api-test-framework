@@ -1,16 +1,16 @@
-const { test, expect } = require('../../fixtures/userFixture');
+require('dotenv').config()
+const { test, expect } = require('@playwright/test');
 const { ProductsPage } = require('../../pages/ProductsPage');
 const { ProductPage } = require('../../pages/ProductPage');
 const { CartPage } = require('../../pages/CartPage');
 const { CheckoutPage } = require('../../pages/CheckoutPage');
 const { PaymentPage } = require('../../pages/PaymentPage');
-const { ConfirmationPage } = require('../../pages/ConfirmationPage');
+const { generateUser } = require('../../utils/userUtils');
+const {LoginPage} = require("../../pages/LoginPage");
+const {SignupPage} = require("../../pages/SignupPage");
 
-
-test('Registered user completes full purchase', async ({ loggedInPage, user }) => {
-    const page = loggedInPage;
+test('Guest registers during checkout and places order', async ({  page, request  }) => {
     const productsPage = new ProductsPage(page);
-    await productsPage.search('Blue Top');
     const productId = 1;
     await productsPage.openProduct(productId);
     const productPage = new ProductPage(page, productId);
@@ -19,9 +19,21 @@ test('Registered user completes full purchase', async ({ loggedInPage, user }) =
     await expect(cartPage.getProduct(productId)).toBeVisible();
 
     await cartPage.checkout();
-    const checkoutPage = new CheckoutPage(page);
-    await checkoutPage.assertDeliveryAddress(user);
+    await cartPage.proceedToLogin();
 
+    const loginPage = new LoginPage(page);
+    const user = generateUser();
+    await loginPage.signUp(user.name, user.email);
+
+    const signupPage = new SignupPage(page);
+    await signupPage.createAccount(user);
+    await expect(signupPage.accountCreatedMessage).toBeVisible();
+    await signupPage.continueAfterCreation()
+    await expect(page.locator('a[href="/logout"]')).toBeVisible()
+
+    await cartPage.open();
+    await cartPage.checkout();
+    const checkoutPage = new CheckoutPage(page);
     await checkoutPage.placeOrder();
 
     const paymentPage = new PaymentPage(page);
@@ -39,8 +51,5 @@ test('Registered user completes full purchase', async ({ loggedInPage, user }) =
     await expect(page.getByText('Congratulations! Your order has been confirmed!')).toBeVisible();
     await expect(page.locator('[data-qa="continue-button"]')).toBeVisible();
 
-    const confirmationPage = new ConfirmationPage(page);
-    await confirmationPage.downloadInvoice();
- // дальше я хочу в загруженном файлике проверить текст
-
+    await request.delete(process.env.BASE_URL + '/api/deleteAccount', { form: { email: user.email, password: user.password } })
 });

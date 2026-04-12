@@ -10,7 +10,7 @@ class CartPage extends BasePage {
         this.url =  '/view_cart';
         this.cartItems = page.locator('tr[id^="product-"]');
         this.deleteButton = page.locator('.cart_quantity_delete');
-
+        this.checkoutButton = page.locator('.check_out');
     }
 
     getProduct(productId) {
@@ -30,6 +30,19 @@ class CartPage extends BasePage {
             await btn.waitFor({ state: 'detached' });
         }
     }
+
+    async checkout() {
+        await this.checkoutButton.click();
+    }
+
+    async getOrderPrice(productId) {
+        return await this.page.locator(`tr#product-${productId} .cart_price p`).innerText();
+    }
+
+    async proceedToLogin() {
+        await this.page.locator('.modal-body a[href="/login"]').click();
+    }
+
 }
 
 module.exports = { CartPage };

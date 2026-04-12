@@ -26,8 +26,9 @@ module.exports = defineConfig({
         // Запускать браузер без UI (true) или с UI (false)
         headless: true,
 
-        screenshot: 'off', //'retain-on-failure',
-        video: 'off' //'retain-on-failure',
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'on-first-retry',
     },
 
     projects: [

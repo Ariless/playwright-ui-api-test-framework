@@ -1,22 +1,30 @@
 const { test, expect } = require('../../fixtures/userFixture');
 const { ProductPage } = require('../../pages/ProductPage');
 const { CartPage } = require('../../pages/CartPage');
+const { CheckoutPage } = require('../../pages/CheckoutPage');
+const { PaymentPage } = require('../../pages/PaymentPage');
 const {ProductsPage} = require("../../pages/ProductsPage");
 
 
-test('Product price matches cart price', async ({ loggedInPage }) => {
+test('Cannot place order with empty payment form', async ({ loggedInPage }) => {
     const page = loggedInPage;
     const productsPage = new ProductsPage(page);
     await productsPage.search('Blue Top');
     const productId = 1;
     await productsPage.openProduct(productId);
     const productPage = new ProductPage(page, productId);
-    const productPagePrice = await productPage.getPrice();
     await productPage.addToCart();
     const cartPage = new CartPage(page);
     await expect(cartPage.getProduct(productId)).toBeVisible();
-    const cartPrice = await cartPage.getOrderPrice(productId);
-    expect(cartPrice).toBe(productPagePrice)
+    await cartPage.checkout();
+    const checkoutPage = new CheckoutPage(page);
+    await checkoutPage.placeOrder();
 
-    await cartPage.clearCart();
+    const paymentPage = new PaymentPage(page);
+    await paymentPage.confirmPayment()
+
+    await expect(page).toHaveURL('/payment')
+
+    await new CartPage(page).clearCart();
+
 });
