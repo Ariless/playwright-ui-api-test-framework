@@ -13,7 +13,6 @@ class PaymentPage extends BasePage {
         this.expiryMonth = page.locator('[data-qa="expiry-month"]')
         this.expiryYear = page.locator('[data-qa="expiry-year"]')
         this.confirmButton = page.locator('[data-qa="pay-button"]')
-//не успеваю поймать локатор сообщения на этой странице - быстро редиректит -  буду проерять сообщение на странице конфирмэйшн
     }
 
     async fillPaymentForm(cardData) {

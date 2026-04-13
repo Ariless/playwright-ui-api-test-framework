@@ -3,16 +3,16 @@ require('dotenv').config();
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
-    // Папка где лежат тесты
+    // Directory where tests are located
     testDir: './tests',
 
-    // Максимальное время на один тест (в миллисекундах)
+    // Timeout per test in milliseconds
     timeout: 90_000,
 
-    // Сколько раз повторить упавший тест
+    // Retry once on failure to handle transient issues
     retries: 1,
 
-    // Репортер — используй 'html'
+    // Reporters
     reporter: [
         ['list'],
         ['html'],
@@ -20,10 +20,10 @@ module.exports = defineConfig({
     ],
 
     use: {
-        // Базовый URL берём из .env
+        // Base URL loaded from .env
         baseURL: process.env.BASE_URL,
 
-        // Запускать браузер без UI (true) или с UI (false)
+        // Run in headless mode
         headless: true,
 
         screenshot: 'only-on-failure',
@@ -32,7 +32,7 @@ module.exports = defineConfig({
     },
 
     projects: [
-        // Один проект — chromium, используй devices['Desktop Chrome']
+        // Single project — Chromium
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
