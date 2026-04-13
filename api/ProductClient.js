@@ -1,16 +1,16 @@
 const { endpoints } = require('../data/testData');
+const { BaseClient } = require('./BaseClient');
 
-class ProductClient {
-    constructor(request) {
-        this.request = request;
-    }
+class ProductClient extends BaseClient {
 
     async getAll() {
-        return this.request.get(endpoints.productsList)
+        const response = await this.request.get(endpoints.productsList)
+        return this.parseResponse(response);
     }
 
     async search(term) {
-        return this.request.post(endpoints.searchProduct, { form: { search_product: term } })
+        const response = await this.request.post(endpoints.searchProduct, { form: { search_product: term } })
+        return this.parseResponse(response);
     }
 }
 

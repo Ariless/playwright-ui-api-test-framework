@@ -1,11 +1,11 @@
 const { test, expect } = require('../../fixtures/userFixture');
-const { PageFactory } = require('../../pages/PageFactory');
+const { LoginPage } = require('../../pages/LoginPage');
 
 test.describe('Auth UI @ui', () => {
 
     test('Login with valid credentials @smoke', async ({ page, user }) => {
         const { email, password, name } = user;
-        const loginPage = new PageFactory(page).loginPage();
+        const loginPage = new LoginPage(page);
         await loginPage.login(email, password);
 
         await expect(page.locator('a[href="/logout"]')).toBeVisible({ timeout: 15000 });
@@ -14,7 +14,7 @@ test.describe('Auth UI @ui', () => {
     });
 
     test('Login with invalid credentials', async ({ page, user }) => {
-        const loginPage = new PageFactory(page).loginPage();
+        const loginPage = new LoginPage(page);
         const { email } = user;
         await loginPage.submitLoginForm(email, 'WrongPass123!');
 
@@ -23,7 +23,7 @@ test.describe('Auth UI @ui', () => {
 
     test('Logout user is logged out', async ({ page, user }) => {
         const { email, password } = user;
-        const loginPage = new PageFactory(page).loginPage();
+        const loginPage = new LoginPage(page);
         await loginPage.login(email, password);
 
         await page.locator('a[href="/logout"]').click();

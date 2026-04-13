@@ -1,16 +1,16 @@
 const { endpoints } = require('../data/testData');
+const { BaseClient } = require('./BaseClient');
 
-class UserClient {
-    constructor(request) {
-        this.request = request;
-    }
+class UserClient extends BaseClient{
 
     async create(user) {
-        return this.request.post(endpoints.account, { form: user })
+        const response = await this.request.post(endpoints.account, { form: user })
+        return this.parseResponse(response);
     }
 
     async delete(email, password) {
-        return this.request.delete(endpoints.deleteUser, {form: { email, password } })
+        const response = await this.request.delete(endpoints.deleteUser, {form: { email, password } })
+        return this.parseResponse(response);
     }
 }
 

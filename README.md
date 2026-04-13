@@ -2,7 +2,16 @@
 
 A scalable end-to-end test automation framework built with **Playwright (JavaScript)** covering **UI, API, and E2E testing** for an e-commerce application.
 
-The project demonstrates real-world automation practices including API-driven test data setup, UI validation, reusable architecture, and CI integration.
+---
+
+## What This Framework Demonstrates
+
+- **API-driven test data management** — users are created and deleted via API calls, not UI flows, keeping tests fast and isolated
+- **Layered architecture** — clear separation between test scenarios, page interactions, and API communication
+- **Real E2E business flows** — full purchase flow including checkout, payment, and invoice validation
+- **Schema-level API validation** — JSON schema validation with AJV ensures API contract stability
+- **CI/CD integration** — automated test runs on every push with Allure and HTML reports as artifacts
+- **Hybrid testing strategy** — UI tests for user behavior, API tests for backend validation, E2E for business flows
 
 ---
 
@@ -10,7 +19,7 @@ The project demonstrates real-world automation practices including API-driven te
 
 - Playwright (`@playwright/test`) — UI tests + API tests via built-in `request`
 - JavaScript (Node.js / CommonJS)
-- Page Object Model (POM) + Page Factory
+- Page Object Model (POM)
 - API Client Layer (`UserClient`, `AuthClient`, `ProductClient`)
 - Custom Playwright Fixtures for reusable flows
 - Test tagging (`@smoke`, `@ui`, `@api`, `@e2e`)
@@ -39,7 +48,7 @@ my-test-framework/
 │   ├── ui/        # UI test scenarios (auth, products, cart)
 │   ├── api/       # API tests (auth, products, users)
 │   └── e2e/       # End-to-end business flows
-├── pages/         # Page Object Model + PageFactory
+├── pages/         # Page Object Model
 ├── api/           # API Client Layer (UserClient, AuthClient, ProductClient)
 ├── fixtures/      # Reusable test setup (user lifecycle, logged-in session)
 ├── utils/         # User data generator
@@ -135,21 +144,62 @@ npx allure serve allure-results
 
 ---
 
+## Running with Docker
+
+```bash
+# Build image
+docker build -t playwright-tests .
+
+# Run all tests
+docker run --rm -e BASE_URL=https://automationexercise.com playwright-tests
+
+# Run smoke tests only
+docker run --rm -e BASE_URL=https://automationexercise.com playwright-tests npx playwright test --grep @smoke
+```
+
+---
+
 ## CI/CD
 
 Tests run automatically on every push and pull request to `main` via GitHub Actions.
 
+Pipeline runs in stages:
+
+1. **smoke** — runs first; blocks other jobs if it fails
+2. **api**, **ui**, **e2e** — run in parallel after smoke passes
+
 Artifacts uploaded on each run:
-- Allure results
-- Playwright HTML report
+- Playwright HTML report per job (smoke, api, ui, e2e)
 - Screenshots / videos / traces (on failure)
+
+---
+
+## Architecture Decisions & Trade-offs
+
+### Why API Client Layer?
+All API calls are encapsulated in `UserClient`, `AuthClient`, and `ProductClient` — tests never reference endpoints or request formats directly. This means if the API changes, only the client class needs updating, not every test that uses it.
+
+### Why no PageFactory?
+PageFactory is a pattern from Java/Selenium that provided real value there (lazy element initialization). In Playwright, elements are already lazy by default — so a factory that just wraps `new PageClass(page)` adds indirection with no benefit. Direct instantiation is clearer and easier to explain.
+
+### Why Playwright's built-in `request` instead of axios?
+Playwright's `request` context integrates natively with the test runner: API calls appear in traces, share the same timeout config, and don't require an extra dependency. For a framework that already depends on Playwright, this is the obvious choice.
+
+### Why hybrid UI + API approach?
+Test data setup and teardown (user creation/deletion) is done via API — it's faster and more reliable than UI flows. The UI is only used where it matters: validating actual user-facing behavior. This keeps tests fast and focused.
+
+### What is NOT tested
+- Visual regression (out of scope — would require a dedicated visual testing tool)
+- Cross-browser coverage (Chromium only — sufficient for demonstrating framework architecture)
+- Performance and load testing (separate concern, separate tooling)
+- Mobile viewports (not in scope for this project)
 
 ---
 
 ## Key Engineering Highlights
 
 - **API Client Layer** — `UserClient`, `AuthClient`, `ProductClient` encapsulate all API calls; tests contain only scenarios
-- **Page Factory pattern** — all Page Objects created through `PageFactory`, no `new PageClass()` in tests
+- **Page Object Model** — each page is a dedicated class with locators and actions; tests contain only scenarios
 - **Playwright-native API testing** — no external HTTP libraries; uses built-in `request` fixture for full trace integration
 - **API-driven test data** — users created and deleted via API in fixtures; tests are fully isolated
 - **SRP enforced** — Page Objects contain only locators and actions, assertions stay in tests

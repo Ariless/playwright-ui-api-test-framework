@@ -7,10 +7,9 @@ test.describe('Users API @api', () => {
     test('User registration', async ({ request }) => {
         const userClient = new UserClient(request);
         const user = generateUser();
-        const response = await userClient.create(user);
-
-        expect((await response.json()).responseCode).toBe(201);
-        expect((await response.json()).message).toBe('User created!');
+        const { body } = await userClient.create(user);
+        expect(body.responseCode).toBe(201);
+        expect(body.message).toBe('User created!');
 
         await userClient.delete( user.email, user.password )
     });
@@ -19,9 +18,8 @@ test.describe('Users API @api', () => {
         const userClient = new UserClient(request);
         const user = generateUser();
         await userClient.create(user);
-        const response = await userClient.create(user);
-
-        expect((await response.json()).responseCode).toBe(400);
+        const { body } = await userClient.create(user);
+        expect(body.responseCode).toBe(400);
 
         await userClient.delete( user.email, user.password )
 
@@ -32,9 +30,7 @@ test.describe('Users API @api', () => {
         const user = generateUser();
         await userClient.create(user);
 
-        const response = await userClient.delete( user.email, user.password )
-
-        const body = await response.json();
+        const { body } = await userClient.delete(user.email, user.password);
 
         expect(body.responseCode).toBe(200);
         expect(body.message).toBe('Account deleted!');

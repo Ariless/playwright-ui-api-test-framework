@@ -24,6 +24,11 @@ class ProductsPage extends BasePage {
         await this.firstProductLink.click();
     }
 
+    async getFirstProductId() {
+        const href = await this.firstProductLink.getAttribute('href');
+        return parseInt(href.split('/').pop());
+    }
+
     async openProduct(productId) {
         await this.navigate(`/product_details/${productId}`);
     }

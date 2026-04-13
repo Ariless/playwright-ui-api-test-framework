@@ -6,44 +6,87 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  smoke:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      # 🧪 Run tests (creates allure-results)
-      - name: Run tests
-        run: npx playwright test
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run smoke tests
+        run: npx playwright test --grep @smoke
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-
-      # 📦 Save Allure results as artifact
-      - name: Upload Allure results
+      - name: Upload smoke report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results
-          path: allure-results
+          name: smoke-report
+          path: playwright-report
 
-      # 📊 Save Playwright HTML report too (optional but useful)
-      - name: Upload Playwright report
+  api:
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run API tests
+        run: npx playwright test --grep @api
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Upload API report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: api-report
+          path: playwright-report
+
+  ui:
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run UI tests
+        run: npx playwright test --grep @ui
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Upload UI report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-report
+          path: playwright-report
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run E2E tests
+        run: npx playwright test --grep @e2e
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Upload E2E report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
           path: playwright-report
       - name: Upload test artifacts (screenshots, videos, traces)
         if: always()
