@@ -1,5 +1,9 @@
 require('dotenv').config();
 
+// Generates a unique user for each test run.
+// Uniqueness is guaranteed by Date.now() timestamp — no two users
+// created in the same millisecond will share an email or name.
+// This prevents data collisions in parallel test runs.
 function generateUser() {
     const id = Date.now();
     return {

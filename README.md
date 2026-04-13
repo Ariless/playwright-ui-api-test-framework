@@ -165,12 +165,14 @@ Tests run automatically on every push and pull request to `main` via GitHub Acti
 
 Pipeline runs in stages:
 
-1. **smoke** — runs first; blocks other jobs if it fails
-2. **api**, **ui**, **e2e** — run in parallel after smoke passes
+1. **smoke** — runs first and gates the pipeline. If smoke fails, no further jobs run — there is no value in running full regression when basic functionality is broken
+2. **api**, **ui**, **e2e** — run in parallel after smoke passes, reducing total pipeline time
 
-Artifacts uploaded on each run:
-- Playwright HTML report per job (smoke, api, ui, e2e)
-- Screenshots / videos / traces (on failure)
+Parallelization is safe because each test creates and deletes its own user via API fixtures, so there are no shared data dependencies between jobs.
+
+On failure, each job uploads:
+- Playwright HTML report
+- Screenshots, videos, and traces for failed tests
 
 ---
 
@@ -187,6 +189,28 @@ Playwright's `request` context integrates natively with the test runner: API cal
 
 ### Why hybrid UI + API approach?
 Test data setup and teardown (user creation/deletion) is done via API — it's faster and more reliable than UI flows. The UI is only used where it matters: validating actual user-facing behavior. This keeps tests fast and focused.
+
+### Flaky Test Strategy
+Retries are used only for transient infrastructure issues, not to mask real failures. All failures are investigated via trace artifacts captured on first retry. Waits are condition-based throughout — no `waitForTimeout`.
+
+### Locator Strategy
+Page Objects use `data-qa` attributes as the primary locator strategy where available, falling back to semantic selectors (roles, labels) and stable CSS selectors. XPath is avoided. This makes tests resilient to layout and styling changes.
+
+Example:
+```js
+this.continueButton = page.locator('[data-qa="continue-button"]');
+this.orderConfirmation = page.locator('[data-qa="order-placed"]');
+```
+
+### Test Design Philosophy
+Automation is applied where it provides reliable, repeatable value: stable UI flows, API contracts, and critical business paths. Tests are not written to cover every edge case at the UI level — boundary and negative cases are validated at the API layer where they are faster and more stable. The question "should this be automated?" is answered by: coverage value vs maintenance cost.
+
+### Debugging Flow
+When a test fails in CI:
+1. Check the uploaded Playwright HTML report — it includes the failure screenshot and error message
+2. If the failure is on retry, open the trace file (`trace: 'on-first-retry'`) to see the full step-by-step execution with network and DOM snapshots
+3. Reproduce locally with `npx playwright test --headed` to observe the browser
+4. If the failure is environment-related (slow response, third-party outage), it will be consistent with a timeout error — not a logic failure
 
 ### What is NOT tested
 - Visual regression (out of scope — would require a dedicated visual testing tool)
