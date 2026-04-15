@@ -31,4 +31,24 @@ test.describe('Auth UI @ui', () => {
         await expect(page).toHaveURL('/login');
     });
 
+    test('Login with empty email', async ({ page, user }) => {
+        const loginPage = new LoginPage(page);
+        await loginPage.submitLoginForm('', user.password);
+        await expect(page.locator('input[data-qa="login-email"]:invalid')).toHaveCount(1);
+    });
+
+    test('Login with empty password', async ({ page, user }) => {
+        const loginPage = new LoginPage(page);
+        await loginPage.submitLoginForm(user.email, '');
+        await expect(page.locator('input[data-qa="login-password"]:invalid')).toHaveCount(1);
+    });
+
+    test('Login page elements are visible', async ({ page }) => {
+        const loginPage = new LoginPage(page);
+        await loginPage.navigate(loginPage.url);
+        await expect(loginPage.emailInput).toBeVisible();
+        await expect(loginPage.passwordInput).toBeVisible();
+        await expect(loginPage.loginButton).toBeVisible();
+    });
+
 });

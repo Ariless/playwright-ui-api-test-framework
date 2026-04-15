@@ -52,4 +52,12 @@ test.describe('Cart UI @ui', () => {
         await cartPage.clearCart();
     });
 
+    test('Remove product from cart', async ({ loggedInPage }) => {
+        // TODO
+    });
+
+    test('Empty cart shows empty state message', async ({ loggedInPage }) => {
+        // TODO
+    });
+
 });

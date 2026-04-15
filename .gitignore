@@ -1,6 +1,8 @@
-after-login.png
-profile-debug.png
-playwrite.config.js
+# Claude Code instructions (local only)
+CLAUDE.md
+
+# Debug screenshots (any .png files)
+*.png
 
 # Playwright reports
 playwright-report/
