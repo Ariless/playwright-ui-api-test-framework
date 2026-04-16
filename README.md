@@ -10,6 +10,7 @@ End-to-end test automation framework built with **Playwright (JavaScript)** for 
 - JavaScript (Node.js / CommonJS)
 - Page Object Model, API Client Layer, Custom Fixtures
 - AJV — JSON schema validation
+- Network interception (`page.route()`) — request mocking
 - GitHub Actions CI/CD, Allure + HTML reporting, Docker
 
 ---
@@ -109,6 +110,10 @@ this.continueButton = page.locator('[data-qa="continue-button"]');
 **Test design** — edge cases and negative scenarios are validated at the API layer (faster, more stable). UI tests cover user journeys only.
 
 **Debugging in CI** — check HTML report → open trace file on retry → reproduce locally with `--headed`.
+
+**Data-driven tests** — category filter tests use a `for...of` loop over a `categories` array in `testData.js`, generating 7 independent test cases from a single definition. Playwright-idiomatic alternative to `test.each`.
+
+**Network mocking** — `page.route()` intercepts payment requests and substitutes controlled responses, isolating E2E tests from external payment dependencies.
 
 **What is NOT tested** — visual regression, cross-browser, performance, mobile viewports.
 
